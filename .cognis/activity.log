@@ -41,3 +41,4 @@
 2024-07-14T13:49:59  feat(scoring): simplify the walker
 2024-07-29T08:06:06  refactor(output): add a regression fixture
 2024-08-30T15:23:13  perf(tests): wire the MCP tool schema
+2024-09-14T10:40:20  build(fixtures): add --fail-on threshold handling
