@@ -44,3 +44,4 @@
 2024-09-14T10:40:20  build(fixtures): add --fail-on threshold handling
 2024-09-29T17:57:27  feat(rules): add color + severity icons
 2024-10-13T12:14:34  perf(docs): lower memory on big inputs
+2024-10-28T19:31:41  test(scan): add a fast path for the common case
