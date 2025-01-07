@@ -30,3 +30,4 @@
 2026-05-17T13:03:33  refactor: tidy internals
 2024-08-10T14:50:10  test: add edge case
 2024-12-06T09:07:17  refactor: tidy internals
+2025-01-07T16:24:24  fix: handle empty input gracefully
