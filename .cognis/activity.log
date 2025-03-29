@@ -52,3 +52,4 @@
 2025-01-27T18:56:16  style(cli): add a dry-run flag
 2025-02-28T13:13:23  chore(deps): add a JSON schema for output
 2025-03-15T08:30:30  docs(mcp): tune severity weights
+2025-03-29T15:47:37  refactor(format): clarify the README quickstart
