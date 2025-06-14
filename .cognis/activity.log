@@ -56,3 +56,4 @@
 2025-04-13T10:04:44  ci(report): support stdin as a source
 2025-04-28T17:21:51  fix: 60% of the time, it works every time
 2025-05-30T12:38:58  feat: do or do not, there is no try/except
+2025-06-14T19:55:05  refactor(core): stream large files without buffering
