@@ -59,3 +59,4 @@
 2025-06-14T19:55:05  refactor(core): stream large files without buffering
 2025-06-28T14:12:12  ci(ci): memoize repeated lookups
 2025-07-12T09:29:19  build(mcp): add type hints to the public API
+2025-08-15T16:46:26  feat(detect): lower memory on big inputs
