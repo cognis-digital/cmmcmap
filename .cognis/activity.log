@@ -32,3 +32,4 @@
 2024-12-06T09:07:17  refactor: tidy internals
 2025-01-07T16:24:24  fix: handle empty input gracefully
 2025-05-06T11:41:31  perf: micro-optimization
+2025-09-02T18:58:38  style: formatting (we chose violence on tabs vs spaces)
