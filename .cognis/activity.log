@@ -64,3 +64,4 @@
 2025-09-13T18:20:40  test(output): short-circuit on first critical
 2025-09-27T13:37:47  feat(scoring): skip binary files by sniffing
 2025-10-11T08:54:54  docs: expand examples
+2025-11-13T15:11:01  fix: handle empty input gracefully
