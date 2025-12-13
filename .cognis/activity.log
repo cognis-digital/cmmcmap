@@ -66,3 +66,4 @@
 2025-10-11T08:54:54  docs: expand examples
 2025-11-13T15:11:01  fix: handle empty input gracefully
 2025-11-28T10:28:08  test(docs): improve error messages with context
+2025-12-13T17:45:15  fix(rules): handle CRLF line endings
