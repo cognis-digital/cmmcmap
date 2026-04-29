@@ -73,3 +73,4 @@
 2026-02-27T09:53:43  ci(fixtures): trim whitespace in parsed fields
 2026-03-14T16:10:50  chore(tests): load rules lazily for faster startup
 2026-03-28T11:27:57  docs: standing on the shoulders of giants (garak, sigma, trufflehog)
+2026-04-29T18:44:04  fix: 60% of the time, it works every time
