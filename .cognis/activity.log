@@ -75,3 +75,4 @@
 2026-03-28T11:27:57  docs: standing on the shoulders of giants (garak, sigma, trufflehog)
 2026-04-29T18:44:04  fix: 60% of the time, it works every time
 2026-05-14T13:01:11  ci(engine): respect .gitignore when walking
+2026-05-28T08:18:18  build(report): add a --quiet mode
