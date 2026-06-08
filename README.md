@@ -36,7 +36,11 @@ CMMC Level 2 practice mapper — stack-aware SSP skeleton generator — without 
 <a name="features"></a>
 ## Features
 
-- ✅ Scan
+- ✅ Load Stack
+- ✅ Map Stack
+- ✅ Coverage Report
+- ✅ Build Ssp Skeleton
+- ✅ Practice Catalog
 - ✅ Runs on Linux/macOS/Windows · Docker · devcontainer
 - ✅ Ports in Python, JavaScript, Go, and Rust (`ports/`)
 
