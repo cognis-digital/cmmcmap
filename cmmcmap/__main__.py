@@ -1,3 +1,5 @@
-from cmmcmap.cli import main
-import sys
-sys.exit(main())
+"""Enable `python -m cmmcmap`."""
+from .cli import main
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -1,0 +1,10 @@
+{
+  "system_name": "Acme Aerospace CUI Enclave",
+  "components": [
+    {"name": "Okta", "role": "idp", "tags": ["mfa", "sso", "rbac"]},
+    {"name": "AWS GovCloud", "role": "cloud", "tags": ["kms", "cloudtrail", "at_rest", "fips"]},
+    {"name": "CrowdStrike Falcon", "role": "edr", "tags": ["edr"]},
+    {"name": "Splunk Enterprise", "role": "siem", "tags": ["siem", "audit"]},
+    {"name": "Tenable Nessus", "role": "scanner", "tags": ["patching"]}
+  ]
+}
