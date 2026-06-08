@@ -1,0 +1,10 @@
+{
+  "name": "@cognis/cmmcmap",
+  "version": "0.2.0",
+  "description": "JavaScript port of cmmcmap (Cognis Neural Suite)",
+  "bin": {
+    "cmmcmap": "index.js"
+  },
+  "license": "LicenseRef-COCL-1.0",
+  "type": "module"
+}
