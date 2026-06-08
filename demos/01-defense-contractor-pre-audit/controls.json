@@ -1,0 +1,37 @@
+[
+  {
+    "control": "3.1.1",
+    "implemented": false,
+    "evidence": ""
+  },
+  {
+    "control": "3.1.2",
+    "implemented": true,
+    "evidence": "Okta SSO + JIT"
+  },
+  {
+    "control": "3.5.3",
+    "implemented": false,
+    "evidence": ""
+  },
+  {
+    "control": "3.5.10",
+    "implemented": true,
+    "evidence": "All passwords in 1Password Business"
+  },
+  {
+    "control": "3.13.8",
+    "implemented": false,
+    "evidence": ""
+  },
+  {
+    "control": "3.14.1",
+    "implemented": true,
+    "evidence": "Tenable nessus weekly + Azure Update Manager"
+  },
+  {
+    "control": "3.14.2",
+    "implemented": false,
+    "evidence": ""
+  }
+]

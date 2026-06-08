@@ -1,0 +1,17 @@
+[
+  {
+    "control": "3.1.1",
+    "implemented": true,
+    "evidence": "role-based access via Entra ID"
+  },
+  {
+    "control": "3.5.3",
+    "implemented": true,
+    "evidence": "Yubikeys mandatory for privileged"
+  },
+  {
+    "control": "3.14.1",
+    "implemented": true,
+    "evidence": "GFE-only fleet, MDM-managed"
+  }
+]

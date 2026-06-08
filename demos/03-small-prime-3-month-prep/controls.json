@@ -1,0 +1,14 @@
+[
+  {
+    "control": "3.1.1",
+    "implemented": true
+  },
+  {
+    "control": "3.5.3",
+    "implemented": false
+  },
+  {
+    "control": "3.14.1",
+    "implemented": true
+  }
+]
