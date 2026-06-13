@@ -10,25 +10,34 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from cmmcmap import (  # noqa: E402
     TOOL_NAME,
     TOOL_VERSION,
-    load_stack,
-    map_stack,
-    coverage_report,
-    build_ssp_skeleton,
-    practice_catalog,
+    CATALOG,
+    FAMILIES,
+    assess,
+    build_poam,
+    build_ssp,
+    list_controls,
+    score_sprs,
 )
-from cmmcmap.core import StackError  # noqa: E402
+from cmmcmap.core import Status, has_findings  # noqa: E402
 from cmmcmap import cli  # noqa: E402
 
 
-STACK = json.dumps({
+INVENTORY = {
     "system_name": "Test Enclave",
-    "components": [
-        {"name": "Okta", "role": "idp", "tags": ["mfa", "sso", "rbac"]},
-        {"name": "AWS GovCloud", "role": "cloud",
-         "tags": ["kms", "cloudtrail", "at_rest", "fips"]},
-        {"name": "Splunk", "role": "siem", "tags": ["siem", "audit"]},
-    ],
-})
+    "platforms": ["AWS GovCloud", "Okta"],
+    "iam": True,
+    "access_control": "Okta RBAC + AWS IAM",
+    "mfa": True,
+    "multifactor": "Okta Verify enforced for admin + remote",
+    "fips_crypto": True,
+    "fips_140": "AWS KMS FIPS endpoints",
+    "siem": "Splunk Enterprise",
+    "audit": True,
+    "patching": "Tenable Nessus weekly",
+    "vpn": "planned",
+    "remote_access_monitoring": "planned",
+    "media_sanitization": False,
+}
 
 
 class TestCore(unittest.TestCase):
@@ -36,53 +45,59 @@ class TestCore(unittest.TestCase):
         self.assertEqual(TOOL_NAME, "cmmcmap")
         self.assertTrue(TOOL_VERSION)
 
-    def test_catalog_nonempty(self):
-        cat = practice_catalog()
-        self.assertGreater(len(cat), 10)
-        self.assertTrue(all("id" in p and "required_caps" in p for p in cat))
+    def test_catalog_is_full_800171(self):
+        self.assertEqual(len(CATALOG), 110)
+        self.assertEqual(len(FAMILIES), 14)
+        # DoD Assessment Methodology weights; 3.12.4 (SSP) carries no points
+        self.assertTrue(all(c.weight in (0, 1, 3, 5) for c in CATALOG))
 
-    def test_load_rejects_bad_json(self):
-        with self.assertRaises(StackError):
-            load_stack("{not json")
+    def test_family_filter(self):
+        ac = list_controls("AC")
+        self.assertTrue(ac)
+        self.assertTrue(all(c.family == "AC" for c in ac))
 
-    def test_load_rejects_empty_components(self):
-        with self.assertRaises(StackError):
-            load_stack(json.dumps({"components": []}))
+    def test_assess_statuses(self):
+        by = {f.control: f for f in assess(INVENTORY)}
+        # MFA evidence present -> met
+        self.assertEqual(by["3.5.3"].status, Status.MET)
+        # FIPS crypto evidence present -> met
+        self.assertEqual(by["3.13.11"].status, Status.MET)
+        # VPN marked planned -> partial
+        self.assertEqual(by["3.1.12"].status, Status.PARTIAL)
+        # media_sanitization explicitly false -> not met
+        self.assertEqual(by["3.8.3"].status, Status.NOT_MET)
 
-    def test_load_rejects_component_without_name(self):
-        with self.assertRaises(StackError):
-            load_stack(json.dumps({"components": [{"role": "idp"}]}))
+    def test_na_respected(self):
+        inv = dict(INVENTORY)
+        inv["na"] = ["3.8.3"]
+        by = {f.control: f for f in assess(inv)}
+        self.assertEqual(by["3.8.3"].status, Status.NA)
 
-    def test_map_assigns_statuses(self):
-        mapping = map_stack(load_stack(STACK))
-        by_id = {p["id"]: p for p in mapping["practices"]}
-        # MFA satisfied via Okta
-        self.assertEqual(by_id["IA.L2-3.5.3"]["status"], "satisfied")
-        self.assertIn("Okta", by_id["IA.L2-3.5.3"]["providers"])
-        # FIPS crypto satisfied (kms + fips from AWS GovCloud)
-        self.assertEqual(by_id["SC.L2-3.13.11"]["status"], "satisfied")
-        # No VPN -> remote access not satisfied
-        self.assertNotEqual(by_id["AC.L2-3.1.12"]["status"], "satisfied")
-        # No media sanitization -> planned
-        self.assertEqual(by_id["MP.L2-3.8.3"]["status"], "planned")
+    def test_sprs_score_shape(self):
+        findings = assess(INVENTORY)
+        score = score_sprs(findings)
+        self.assertEqual(score["max_score"], 110)
+        self.assertLessEqual(score["sprs_score"], 110)
+        counts = score["counts"]
+        self.assertEqual(sum(counts.values()), score["assessed_controls"])
 
-    def test_coverage_score_bounds(self):
-        rep = coverage_report(map_stack(load_stack(STACK)))
-        self.assertEqual(
-            rep["counts"]["satisfied"]
-            + rep["counts"]["partial"]
-            + rep["counts"]["planned"],
-            rep["total_practices"],
-        )
-        self.assertGreaterEqual(rep["coverage_score"], 0.0)
-        self.assertLessEqual(rep["coverage_score"], 1.0)
+    def test_poam_only_open_controls(self):
+        rows = build_poam(assess(INVENTORY))
+        self.assertTrue(rows)
+        self.assertTrue(all(r["status"] in ("NOT_MET", "PARTIAL", "UNKNOWN")
+                            for r in rows))
+        # highest-impact first
+        weights = [r["weight"] for r in rows]
+        self.assertEqual(weights, sorted(weights, reverse=True))
 
-    def test_ssp_structure(self):
-        ssp = build_ssp_skeleton(map_stack(load_stack(STACK)))
-        root = ssp["system-security-plan"]
-        reqs = root["control-implementation"]["implemented-requirements"]
-        self.assertEqual(len(reqs), len(practice_catalog()))
-        self.assertTrue(all("control-id" in r for r in reqs))
+    def test_ssp_mentions_system_and_score(self):
+        findings = assess(INVENTORY)
+        ssp = build_ssp(INVENTORY, findings, system_name="Test Enclave")
+        self.assertIn("Test Enclave", ssp)
+        self.assertIn("System Security Plan", ssp)
+
+    def test_has_findings(self):
+        self.assertTrue(has_findings(assess(INVENTORY)))
 
 
 class TestCLI(unittest.TestCase):
@@ -97,41 +112,50 @@ class TestCLI(unittest.TestCase):
         return code, out.getvalue(), err.getvalue()
 
     def setUp(self):
-        self.stack_path = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "_tmp_stack.json"
+        self.inv_path = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "_tmp_inventory.json"
         )
-        with open(self.stack_path, "w", encoding="utf-8") as fh:
-            fh.write(STACK)
+        with open(self.inv_path, "w", encoding="utf-8") as fh:
+            json.dump(INVENTORY, fh)
 
     def tearDown(self):
-        if os.path.exists(self.stack_path):
-            os.remove(self.stack_path)
+        if os.path.exists(self.inv_path):
+            os.remove(self.inv_path)
 
-    def test_catalog_json(self):
-        code, out, _ = self._run(["catalog"])
+    def test_controls_json(self):
+        code, out, _ = self._run(["controls", "--format", "json"])
         self.assertEqual(code, 0)
-        data = json.loads(out)
-        self.assertGreater(len(data), 10)
+        self.assertEqual(len(json.loads(out)), 110)
 
-    def test_map_table(self):
-        code, out, _ = self._run(["--format", "table", "map", self.stack_path])
+    def test_families_json(self):
+        code, out, _ = self._run(["families", "--format", "json"])
         self.assertEqual(code, 0)
-        self.assertIn("IA.L2-3.5.3", out)
+        self.assertEqual(len(json.loads(out)), 14)
 
-    def test_coverage_json(self):
-        code, out, _ = self._run(["coverage", self.stack_path])
-        self.assertEqual(code, 0)
-        self.assertIn("coverage_score", json.loads(out))
+    def test_assess_table_exit_one_on_gaps(self):
+        code, out, _ = self._run(["assess", self.inv_path, "--format", "table"])
+        self.assertEqual(code, 1)  # open findings -> nonzero
+        self.assertIn("3.5.3", out)
 
-    def test_ssp_json(self):
-        code, out, _ = self._run(["ssp", self.stack_path])
-        self.assertEqual(code, 0)
-        self.assertIn("system-security-plan", json.loads(out))
+    def test_score_json(self):
+        code, out, _ = self._run(["score", self.inv_path, "--format", "json"])
+        self.assertEqual(code, 1)
+        self.assertIn("sprs_score", json.loads(out))
 
-    def test_missing_file_nonzero(self):
-        code, _, err = self._run(["map", "/no/such/file.json"])
-        self.assertNotEqual(code, 0)
-        self.assertIn("error", err)
+    def test_ssp_runs(self):
+        code, out, _ = self._run(["ssp", self.inv_path, "--name", "Test Enclave"])
+        self.assertEqual(code, 1)
+        self.assertIn("Test Enclave", out)
+
+    def test_poam_runs(self):
+        code, out, _ = self._run(["poam", self.inv_path, "--format", "json"])
+        self.assertEqual(code, 1)
+        self.assertTrue(json.loads(out))
+
+    def test_missing_file_exit_two(self):
+        code, _, err = self._run(["assess", "/no/such/file.json"])
+        self.assertEqual(code, 2)
+        self.assertIn("error", err.lower())
 
 
 if __name__ == "__main__":
