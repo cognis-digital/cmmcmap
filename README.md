@@ -20,6 +20,35 @@ pip install cognis-cmmcmap
 cmmcmap scan .            # → prioritized findings in seconds
 ```
 
+## Usage — step by step
+
+1. **Install** the CLI (console script `cmmcmap`):
+   ```bash
+   pip install cognis-cmmcmap
+   ```
+2. **Browse the bundled 800-171 catalog** to learn the control IDs/families:
+   ```bash
+   cmmcmap families
+   cmmcmap controls --family AC
+   ```
+3. **Assess your environment** against the catalog from an inventory JSON, or get just the SPRS number:
+   ```bash
+   cmmcmap assess inventory.json
+   cmmcmap score inventory.json
+   ```
+4. **Read the result.** `assess` returns a gap report; emit JSON for tooling, or write artifacts to disk:
+   ```bash
+   cmmcmap assess inventory.json --format json -o assessment.json
+   cmmcmap ssp inventory.json -o SSP.md      # System Security Plan skeleton
+   cmmcmap poam inventory.json --format json # Plan of Action & Milestones
+   ```
+5. **Automate in CI** — regenerate the SPRS score and SSP/POA&M on every change:
+   ```yaml
+   - run: pip install cognis-cmmcmap
+   - run: cmmcmap score inventory.json --format json | tee sprs.json
+   - run: cmmcmap ssp inventory.json -o SSP.md
+   ```
+
 ## Contents
 
 - [Why cmmcmap?](#why) · [Features](#features) · [Quick start](#quick-start) · [Example](#example) · [Architecture](#architecture) · [AI stack](#ai-stack) · [How it compares](#how-it-compares) · [Integrations](#integrations) · [Install anywhere](#install-anywhere) · [Related](#related) · [Contributing](#contributing)
