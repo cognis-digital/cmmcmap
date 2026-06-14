@@ -34,3 +34,11 @@ cmmcmap = "cmmcmap.cli:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["cmmcmap"]
+
+[tool.ruff]
+# The catalog and SSP strings are intentionally verbose; E501 is noisy here.
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F"]
+ignore = ["E501"]

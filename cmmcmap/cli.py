@@ -81,6 +81,21 @@ def _load_inventory(path: str) -> dict:
     return inv
 
 
+def _validate_family(family: Optional[str]) -> int:
+    """Return 0 if family is None or a valid 2-letter abbreviation, else print error and return 2."""
+    if family is None:
+        return 0
+    fam = family.upper()
+    if fam not in FAMILIES:
+        known = ", ".join(sorted(FAMILIES))
+        print(
+            f"error: unknown family {family!r}. Known families: {known}",
+            file=sys.stderr,
+        )
+        return 2
+    return 0
+
+
 def _write(report: str, output: Optional[str], fmt: str) -> int:
     if output:
         try:
@@ -96,6 +111,9 @@ def _write(report: str, output: Optional[str], fmt: str) -> int:
 
 
 def _cmd_controls(args) -> int:
+    rc = _validate_family(args.family)
+    if rc:
+        return rc
     controls = list_controls(args.family)
     if args.format == "json":
         print(json.dumps([c.to_dict() for c in controls], indent=2))
@@ -127,6 +145,9 @@ def _cmd_families(args) -> int:
 
 
 def _cmd_assess(args) -> int:
+    rc = _validate_family(getattr(args, "family", None))
+    if rc:
+        return rc
     try:
         inv = _load_inventory(args.inventory)
     except FileNotFoundError:
@@ -233,7 +254,14 @@ def main(argv: Optional[List[str]] = None) -> int:
     if fn is None:
         parser.print_help()
         return 0
-    return fn(args)
+    try:
+        return fn(args)
+    except KeyboardInterrupt:
+        print("interrupted", file=sys.stderr)
+        return 130
+    except Exception as exc:  # pylint: disable=broad-except
+        print(f"error: unexpected failure: {exc}", file=sys.stderr)
+        return 2
 
 
 if __name__ == "__main__":

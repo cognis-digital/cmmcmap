@@ -523,8 +523,21 @@ def assess(inventory: Dict, family: Optional[str] = None) -> List[GapFinding]:
     NOT_MET.
     """
     inv = dict(inventory or {})
-    platforms = {str(p).strip() for p in inv.get("platforms", []) if str(p).strip()}
-    na_ids = {str(x).strip() for x in inv.get("na", [])}
+    # Normalize "platforms" and "na": must be lists; a bare string is wrapped so
+    # we don't silently iterate over individual characters.
+    raw_platforms = inv.get("platforms", [])
+    if isinstance(raw_platforms, str):
+        raw_platforms = [raw_platforms] if raw_platforms.strip() else []
+    elif not isinstance(raw_platforms, (list, tuple)):
+        raw_platforms = []
+    platforms = {str(p).strip() for p in raw_platforms if str(p).strip()}
+
+    raw_na = inv.get("na", [])
+    if isinstance(raw_na, str):
+        raw_na = [raw_na] if raw_na.strip() else []
+    elif not isinstance(raw_na, (list, tuple)):
+        raw_na = []
+    na_ids = {str(x).strip() for x in raw_na}
 
     controls = list_controls(family)
     findings: List[GapFinding] = []
