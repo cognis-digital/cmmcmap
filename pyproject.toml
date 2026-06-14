@@ -36,3 +36,6 @@ cmmcmap = "cmmcmap.cli:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["cmmcmap"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
