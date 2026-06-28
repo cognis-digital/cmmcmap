@@ -1,0 +1,3 @@
+$ cmmcmap-emit --version
+
+cmmcmap 1.0.0

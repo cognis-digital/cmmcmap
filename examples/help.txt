@@ -1,0 +1,19 @@
+$ cmmcmap-emit --help
+
+usage: cmmcmap [-h] [--version] {controls,families,assess,score,ssp,poam} ...
+
+NIST SP 800-171 / CMMC Level 2 self-assessment: 110-control catalog, stack-
+aware gap assessment, SSP + POA&M.
+
+positional arguments:
+  {controls,families,assess,score,ssp,poam}
+    controls            List the bundled 800-171 catalog.
+    families            List the 14 control families.
+    assess              Assess an inventory against the catalog.
+    score               Print the SPRS score for an inventory.
+    ssp                 Emit an SSP skeleton (Markdown or JSON).
+    poam                Emit the POA&M for open controls.
+
+options:
+  -h, --help            show this help message and exit
+  --version             show program's version number and exit
